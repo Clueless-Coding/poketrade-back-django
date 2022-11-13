@@ -5,4 +5,4 @@ from .models import Pokemon
 class PokemonSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Pokemon
-        fields = ('url', 'id', 'name', )
+        fields = ('url', 'id', 'name', 'worth', 'height', 'weight')
