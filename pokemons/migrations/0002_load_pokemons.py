@@ -2,34 +2,39 @@
 
 from django.db import migrations
 
-import requests
+import httpx
+import asyncio
 
 POKEMON_LIMIT = 151
 POKE_API_URL = 'https://pokeapi.co/api/v2/pokemon/{id}/'
 
+async def get_pokemon(model, id):
+    async with httpx.AsyncClient() as client:
+        body = (await client.get(
+            POKE_API_URL.format(id=id)
+        )).json()
 
-# TODO: Right now I load each pokemon synchronously
-# and it takes about 10-15 seconds to load 151 pokemon.
-# I need to rewrite it asyncronously to make it faster.
+        pokemon = model(
+            id=body['id'],
+            name=body['name'],
+            worth=body['base_experience'],
+            height=body['height'],
+            weight=body['weight'],
+            # TODO: Add more fields such as types, image
+        )
+        return pokemon
+
+
 def load_pokemons(apps, schema_editor):
     Pokemon = apps.get_model("pokemons", "Pokemon")
-    pokemons = []
 
-    for id in range(1, POKEMON_LIMIT):
-        pokemon = requests.get(
-            POKE_API_URL.format(id=id)
-        ).json()
-        pokemons.append(
-            Pokemon(
-                id=pokemon['id'],
-                name=pokemon['name'],
-                worth=pokemon['base_experience'],
-                height=pokemon['height'],
-                weight=pokemon['weight'],
-                # TODO: Add more fields such as types, image
-            ),
-        )
+    async def get_pokemons():
+        return await asyncio.gather(*[
+            get_pokemon(Pokemon, id)
+            for id in range(1, POKEMON_LIMIT)
+        ])
 
+    pokemons = asyncio.run(get_pokemons())
     Pokemon.objects.bulk_create(pokemons)
 
 
