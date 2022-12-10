@@ -8,31 +8,31 @@ import asyncio
 POKEMON_LIMIT = 151
 POKE_API_URL = 'https://pokeapi.co/api/v2/pokemon/{id}/'
 
-async def get_pokemon(model, id):
-    async with httpx.AsyncClient() as client:
-        body = (await client.get(
-            POKE_API_URL.format(id=id)
-        )).json()
+async def get_pokemon(client, model, id):
+    body = (await client.get(
+        POKE_API_URL.format(id=id)
+    )).json()
 
-        pokemon = model(
-            id=body['id'],
-            name=body['name'],
-            worth=body['base_experience'],
-            height=body['height'],
-            weight=body['weight'],
-            # TODO: Add more fields such as types, image
-        )
-        return pokemon
+    pokemon = model(
+        id=body['id'],
+        name=body['name'],
+        worth=body['base_experience'],
+        height=body['height'],
+        weight=body['weight'],
+        # TODO: Add more fields such as types, image
+    )
+    return pokemon
 
 
 def load_pokemons(apps, schema_editor):
     Pokemon = apps.get_model("pokemons", "Pokemon")
 
     async def get_pokemons():
-        return await asyncio.gather(*[
-            get_pokemon(Pokemon, id)
-            for id in range(1, POKEMON_LIMIT)
-        ])
+        async with httpx.AsyncClient() as client:
+            return await asyncio.gather(*[
+                get_pokemon(client, Pokemon, id)
+                for id in range(1, POKEMON_LIMIT)
+            ])
 
     pokemons = asyncio.run(get_pokemons())
     Pokemon.objects.bulk_create(pokemons)
