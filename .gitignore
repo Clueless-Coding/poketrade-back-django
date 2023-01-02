@@ -1,6 +1,8 @@
 *.db
 *.sqlite3
 *.pyc
-.pgpass
+
+.env
+
 .venv/
 __pycache__/
