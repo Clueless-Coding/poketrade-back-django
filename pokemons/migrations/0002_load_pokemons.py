@@ -21,7 +21,6 @@ async def get_pokemon(client, model, id):
         weight=body['weight'],
         image=body['sprites']['other']['official-artwork']['front_default'],
         types=[pokemon_type['type']['name'] for pokemon_type in body['types']]
-        # TODO: Add more fields such as types, image
     )
     return pokemon
 
@@ -33,7 +32,7 @@ def load_pokemons(apps, schema_editor):
         async with httpx.AsyncClient() as client:
             return await asyncio.gather(*[
                 get_pokemon(client, Pokemon, id)
-                for id in range(1, POKEMON_LIMIT)
+                for id in range(1, POKEMON_LIMIT + 1)
             ])
 
     pokemons = asyncio.run(get_pokemons())
