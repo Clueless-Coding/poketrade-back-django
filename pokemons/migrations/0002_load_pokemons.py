@@ -19,6 +19,8 @@ async def get_pokemon(client, model, id):
         worth=body['base_experience'],
         height=body['height'],
         weight=body['weight'],
+        image=body['sprites']['other']['official-artwork']['front_default'],
+        types=[pokemon_type['type']['name'] for pokemon_type in body['types']]
         # TODO: Add more fields such as types, image
     )
     return pokemon

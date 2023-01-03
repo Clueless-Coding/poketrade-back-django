@@ -19,6 +19,8 @@ class Migration(migrations.Migration):
                 ('worth', models.PositiveIntegerField()),
                 ('height', models.PositiveIntegerField()),
                 ('weight', models.PositiveIntegerField()),
+                ('image', models.URLField()),
+                ('types', models.JSONField())
             ],
         ),
     ]
